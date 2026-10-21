@@ -1,0 +1,90 @@
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-auth-service
+      - api-hotel-service
+    networks:
+      - auth-net
+      - hotel-net
+
+  api-auth-service:
+    image: engahmedsaid125/apiauthservice
+    build:
+      context: ../api-auth-service
+    env_file:
+      - ../api-auth-service/.env
+    volumes:
+      - ../api-auth-service/src:/app/src
+    expose:
+      - "3000"
+    networks:
+      - auth-net
+      - messaging
+
+  api-hotel-service:
+    image: engahmedsaid125/apihotelservice
+    build:
+      context: ../api-hotel-service
+    env_file:
+      - ../api-hotel-service/.env
+    volumes:
+      - ../api-hotel-service/src:/app/src
+    networks:
+      - hotel-net
+      - messaging
+
+  mongo-auth:
+    image: mongo:8
+    volumes:
+      - auth_db:/data/db
+    networks:
+      - auth-net
+
+  mongo-hotel:
+    image: mongo:8
+    volumes:
+      - hotel_db:/data/db
+    networks:
+      - hotel-net
+
+  redis-auth:
+    image: redis:7-alpine
+    volumes:
+      - auth_redis:/data
+    networks:
+      - auth-net
+
+  redis-hotel:
+    image: redis:7-alpine
+    volumes:
+      - hotel_redis:/data
+    networks:
+      - hotel-net
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - messaging
+
+volumes:
+  auth_db:
+  hotel_db:
+  auth_redis:
+  hotel_redis:
+  rabbitmq_data:
+
+networks:
+  auth-net:
+    driver: bridge
+  hotel-net:
+    driver: bridge
+  messaging:
+    driver: bridge
