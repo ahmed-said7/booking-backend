@@ -1,0 +1,82 @@
+name: Booking Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+# This workflow can also be triggered manually from the Actions tab in GitHub.
+  workflow_dispatch:
+
+# Permissions are set to read-only for contents to enhance security.
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI - Test ${{ matrix.service }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # if any of the matrix jobs fail, the rest will continue to run,
+      #  and the overall job will be marked as failed.
+      fail-fast: false
+      matrix:
+        service:
+          - api-auth-service
+          - api-hotel-service
+
+    steps:
+      # Checkout the repository to access the code for the service being tested.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Node.js environment for the service being tested, install dependencies,
+      #  run linting, tests, and build the NestJS application.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.service }}
+        run: npm ci
+
+      - name: Lint
+        working-directory: ${{ matrix.service }}
+        run: npm run lint --if-present
+
+      - name: Test
+        working-directory: ${{ matrix.service }}
+        run: npm test --if-present
+
+      - name: Build NestJS
+        working-directory: ${{ matrix.service }}
+        run: npm run build
+
+  cd:
+    name: CD - Deploy to Server
+    runs-on: ubuntu-latest
+    needs: ci
+
+    # Deploy only when manually triggered, not on push or pull_request.
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Deploy using Docker Compose
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /booking-backend
+            docker compose -f infrastructure/compose.yml pull
+            docker compose -f infrastructure/compose.yml up -d --remove-orphans
+
