@@ -41,6 +41,9 @@ services:
 
   mongo-auth:
     image: mongo:8
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - auth_db:/data/db
     networks:
@@ -56,22 +59,18 @@ services:
     networks:
       - hotel-net
 
-  redis-auth:
+  redis:
     image: redis:7-alpine
     volumes:
       - auth_redis:/data
     networks:
       - auth-net
 
-  redis-hotel:
-    image: redis:7-alpine
-    volumes:
-      - hotel_redis:/data
-    networks:
-      - hotel-net
-
   rabbitmq:
     image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
