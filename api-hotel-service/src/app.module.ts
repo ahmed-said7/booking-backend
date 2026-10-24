@@ -3,12 +3,17 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MessagingModule } from './rabbit/messaging.module.js';
+import { HotelModule } from './hotel/hotel.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    MessagingModule,
+    HotelModule,
 
     MongooseModule.forRootAsync({
       inject: [ConfigService],

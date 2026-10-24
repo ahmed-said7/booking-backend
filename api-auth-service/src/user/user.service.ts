@@ -10,6 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto.js';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user_response.dto.js';
 import { RedisService } from '../redis/redis.service.js';
+import { UserCreatedPublisher } from './publisher/user-created-publisher.service.js';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,7 @@ export class UsersService {
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
     private readonly redisService: RedisService,
+    private readonly userCreatedPublisher: UserCreatedPublisher,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -45,6 +47,9 @@ export class UsersService {
     });
 
     await this.redisService.set(`user:${result.id}`, JSON.stringify(result), 60);
+
+
+    await this.userCreatedPublisher.publish(result);
 
     return result;
   }

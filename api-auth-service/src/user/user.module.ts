@@ -6,6 +6,7 @@ import { User, UserSchema } from './user.schema.js';
 import { UsersController } from './user.controller.js';
 import { UsersService } from './user.service.js';
 import { RedisModule } from '../redis/redis.module.js';
+import { UserCreatedPublisher } from './publisher/user-created-publisher.service.js';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { RedisModule } from '../redis/redis.module.js';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UserCreatedPublisher],
   exports: [UsersService],
 })
 export class UsersModule {}

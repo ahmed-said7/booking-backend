@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RedisModule } from './redis/redis.module.js';
 import { UsersModule } from './user/user.module.js';
+import { MessagingModule } from './rabbit/messaging.module.js';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { UsersModule } from './user/user.module.js';
     }),
 
     RedisModule,
-
+    MessagingModule,
     UsersModule,
   ],
 
