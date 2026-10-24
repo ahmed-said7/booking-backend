@@ -1,0 +1,22 @@
+title: Booking Service Requirements
+
+
+functional requirements
+book ticket and confirm ticket payment
+view event
+search for events (location, date, type , term)
+
+
+non functional requirement
+strong consistency for booking
+availability of search events
+
+
+
+
+user admin - authentication service
+upload images-videos service
+payment service
+booking ticket service
+event service ( search, crud, venue, performer) - elasticsearch
+virtual waiting queue
